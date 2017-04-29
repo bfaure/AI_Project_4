@@ -1,7 +1,7 @@
 import sys,os,time
 from copy import copy,deepcopy
 
-discount=0.99
+discount=0.9
 
 reward_dict={"s1":0.0,"s2":0.0,"s3":1.0,"s4":0.0}
 
@@ -15,6 +15,17 @@ def write_utilities(util_dict,device=sys.stdout):
 	for key,value in util_dict.items():
 		device.write("%s:\t%0.5f\n"%(key,value))
 
+def R(s):
+	try:    return reward_dict[s]
+	except: return -1
+
+def T(si,a,sj):
+	try:
+		possible_actions=trans_dict[si][a]
+		for s,p in possible_actions:
+			if s==sj: return p 
+	except: return -1
+
 def U(s,prior_utils):
 	best_action_util=None 
 	for action,outcomes in trans_dict[s].items():
@@ -27,10 +38,16 @@ def U(s,prior_utils):
 	return reward_dict[s]+(discount*best_action_util),best_action
 
 # err = maximum error allowed in the utility of any state
-def value_iteration(err=0.001):
+def value_iteration(err=0.0001):
 	util_log=open("value_iteration-utils.tsv","w")
 	action_log=open("value_iteration-actions.tsv","w")
 	meta_log=open("value_iteration-meta.txt","w")
+	meta_log.write("Discount: %0.10f\n"%discount)
+	meta_log.write("Error: %0.10f\n"%err)
+
+	print("Discount: %0.5f | Error: %0.10f"%(discount,err))
+
+	start_time=time.time()
 
 	i=0
 	u0=copy(reward_dict) # create initial utilities distribution
@@ -60,7 +77,8 @@ def value_iteration(err=0.001):
 
 		u0=copy(u1)
 		if d<(err*((1-discount)/discount)): break
-	sys.stdout.write("\n")
+	sys.stdout.write("\nTotal time: %0.10f\n"%(time.time()-start_time))
+	meta_log.write("Total Time: %0.10f\n"%(time.time()-start_time))
 	return u0
 
 def main():
