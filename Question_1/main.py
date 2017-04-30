@@ -50,11 +50,13 @@ def value_iteration(err=0.0001):
 	start_time=time.time()
 
 	i=0
-	u0=copy(reward_dict) # create initial utilities distribution
-	for s,u in u0.items():
-		util_log.write("%s%s"%(s,"\t" if i!=len(u0)-1 else "\n"))
-		action_log.write("%s%s"%(s,"\t" if i!=len(u0)-1 else "\n"))
+	u0={}
+	u1={}
+	for s,u in reward_dict.items(): # create initial utilies distribution
+		util_log.write("%s%s"%(s,"\t" if i!=len(reward_dict)-1 else "\n"))
+		action_log.write("%s%s"%(s,"\t" if i!=len(reward_dict)-1 else "\n"))
 		u0[s]=0.0
+		u1[s]=0.0
 		i+=1
 
 	d=0.0
@@ -65,18 +67,18 @@ def value_iteration(err=0.0001):
 		sys.stdout.flush()
 
 		d=0.0
-		u1=copy(u0)
+		u0=copy(u1)
 
 		j=0
-		for s in reward_dict.keys():
+		for s in reward_dict.keys(): # iterate over each state name
 			u1[s],action = U(s,u0)
 			util_log.write("%0.10f%s"%(u1[s],"\t" if j!=len(reward_dict)-1 else "\n"))
 			action_log.write("%s%s"%(action,"\t" if j!=len(reward_dict)-1 else "\n"))
 			if abs(u1[s]-u0[s])>d: d=abs(u1[s]-u0[s])
 			j+=1
 
-		u0=copy(u1)
 		if d<(err*((1-discount)/discount)): break
+		
 	sys.stdout.write("\nTotal time: %0.10f\n"%(time.time()-start_time))
 	meta_log.write("Total Time: %0.10f\n"%(time.time()-start_time))
 	return u0
