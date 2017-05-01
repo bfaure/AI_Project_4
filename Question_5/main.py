@@ -72,7 +72,7 @@ def plot(matrix,weights=None,title="Prediction Matrix",save_plot=False):
 		ax.set_title(title)
 		ax.set_xlabel("i1")
 		ax.set_ylabel("i2")
-
+		
 		if weights!=None:
 			map_min=0.0
 			map_max=1.1
@@ -88,7 +88,7 @@ def plot(matrix,weights=None,title="Prediction Matrix",save_plot=False):
 			zs=np.array(zs)
 			zs = zs.reshape(xs.shape)
 			cp=plt.contourf(xs,ys,zs,levels=[-1,-0.0001,0,1],colors=('b','r'),alpha=0.1)
-
+		
 		c1_data=[[],[]]
 		c0_data=[[],[]]
 		for i in range(len(matrix)):
@@ -183,7 +183,7 @@ def main():
 	l_rate  		= 1.0
 	plot_each_epoch	= True
 	stop_early 		= True
-	save 			= True
+	save 			= False
 
 			# 	Bias 	i1 		i2 		y
 	matrix = [	[1.0,	0.02, 	0.48,	0.0],
