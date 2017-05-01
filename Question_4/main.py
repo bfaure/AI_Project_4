@@ -1,11 +1,6 @@
 from __future__ import print_function
-
-import sys,os,time
-from copy import copy,deepcopy
-
 import matplotlib
 from matplotlib import pyplot as plt
-
 import numpy as np
 
 def predict(inputs,weights):
@@ -14,72 +9,73 @@ def predict(inputs,weights):
 		activation += i*w 
 	return 1.0 if activation>=0.0 else 0.0
 
-def plot_2D(i1,i2,y,weights=None):
-	fig,ax = plt.subplots()
-	ax.set_xlabel("i1")
-	ax.set_ylabel("i2")
+def plot(matrix,weights=None,title="Prediction Matrix"):
 
-	if weights!=None:
-		map_min=0.0
-		map_max=1.1
-
-		y_res=0.001
-		x_res=0.001
-
-		ys=np.arange(map_min,map_max,y_res)
-		xs=np.arange(map_min,map_max,x_res)
-		zs=[]
-		for cur_y in np.arange(map_min,map_max,y_res):
-			cur_zs=[]
-			for cur_x in np.arange(map_min,map_max,x_res):
-				zs.append(predict([1.0,cur_x,cur_y],weights))
-		xs,ys=np.meshgrid(xs,ys)
-		zs=np.array(zs)
-		zs = zs.reshape(xs.shape)
-		cp=plt.contourf(xs,ys,zs,levels=[-1,-0.0001,0,1],colors=('b','r'),alpha=0.1)
-
-	c1_data=[[],[]]
-	c0_data=[[],[]]
-	for i in range(len(i1)):
-		cur_i1 = i1[i]
-		cur_i2 = i2[i]
-		cur_y  = y[i]
-		if cur_y==1:
-			c1_data[0].append(cur_i1)
-			c1_data[1].append(cur_i2)
-		else:
-			c0_data[0].append(cur_i1)
-			c0_data[1].append(cur_i2)
-
-	plt.xticks(np.arange(0.0,1.1,0.1))
-	plt.yticks(np.arange(0.0,1.1,0.1))
-	plt.xlim(0,1.05)
-	plt.ylim(0,1.05)
-
-	c0s = plt.scatter(c0_data[0],c0_data[1],s=40.0,c='r',label='Class -1')
-	c1s = plt.scatter(c1_data[0],c1_data[1],s=40.0,c='b',label='Class 1')
-
-	plt.legend(fontsize=10,loc=1)
-	plt.show()
-
-def plot(input_matrix,y,weights=None):
-	if len(input_matrix[0])==3:
+	if len(matrix[0])==3: # if 1D inputs, excluding bias and ys 
 		fig,ax = plt.subplots()
+		ax.set_title(title)
+		ax.set_xlabel("i1")
+		ax.set_ylabel("Classifications")
+
+		if weights!=None:
+			y_min=-0.1
+			y_max=1.1
+			x_min=0.0
+			x_max=1.1
+			y_res=0.001
+			x_res=0.001
+			ys=np.arange(y_min,y_max,y_res)
+			xs=np.arange(x_min,x_max,x_res)
+			zs=[]
+			for cur_y in np.arange(y_min,y_max,y_res):
+				for cur_x in np.arange(x_min,x_max,x_res):
+					zs.append(predict([1.0,cur_x],weights))
+			xs,ys=np.meshgrid(xs,ys)
+			zs=np.array(zs)
+			zs = zs.reshape(xs.shape)
+			cp=plt.contourf(xs,ys,zs,levels=[-1,-0.0001,0,1],colors=('b','r'),alpha=0.1)
+		
+		c1_data=[[],[]]
+		c0_data=[[],[]]
+
+		for i in range(len(matrix)):
+			cur_i1 = matrix[i][1]
+			cur_y  = matrix[i][-1]
+
+			if cur_y==1:
+				c1_data[0].append(cur_i1)
+				c1_data[1].append(1.0)
+			else:
+				c0_data[0].append(cur_i1)
+				c0_data[1].append(0.0)
+
+		plt.xticks(np.arange(x_min,x_max,0.1))
+		plt.yticks(np.arange(y_min,y_max,0.1))
+		plt.xlim(0,1.05)
+		plt.ylim(-0.05,1.05)
+
+		c0s = plt.scatter(c0_data[0],c0_data[1],s=40.0,c='r',label='Class -1')
+		c1s = plt.scatter(c1_data[0],c1_data[1],s=40.0,c='b',label='Class 1')
+
+		plt.legend(fontsize=10,loc=1)
+		plt.show()
+		return
+
+	if len(matrix[0])==4: # if 2D inputs, excluding bias and ys
+		fig,ax = plt.subplots()
+		ax.set_title(title)
 		ax.set_xlabel("i1")
 		ax.set_ylabel("i2")
 
 		if weights!=None:
 			map_min=0.0
 			map_max=1.1
-
 			y_res=0.001
 			x_res=0.001
-
 			ys=np.arange(map_min,map_max,y_res)
 			xs=np.arange(map_min,map_max,x_res)
 			zs=[]
 			for cur_y in np.arange(map_min,map_max,y_res):
-				cur_zs=[]
 				for cur_x in np.arange(map_min,map_max,x_res):
 					zs.append(predict([1.0,cur_x,cur_y],weights))
 			xs,ys=np.meshgrid(xs,ys)
@@ -89,10 +85,10 @@ def plot(input_matrix,y,weights=None):
 
 		c1_data=[[],[]]
 		c0_data=[[],[]]
-		for i in range(len(input_matrix)):
-			cur_i1 = input_matrix[i][1]
-			cur_i2 = input_matrix[i][2]
-			cur_y  = y[i]
+		for i in range(len(matrix)):
+			cur_i1 = matrix[i][1]
+			cur_i2 = matrix[i][2]
+			cur_y  = matrix[i][-1]
 			if cur_y==1:
 				c1_data[0].append(cur_i1)
 				c1_data[1].append(cur_i2)
@@ -110,103 +106,80 @@ def plot(input_matrix,y,weights=None):
 
 		plt.legend(fontsize=10,loc=1)
 		plt.show()
-	else:
-		print("Matrix dimensions not covered.")
+		return
+	
+	print("Matrix dimensions not covered.")
 
-def accuracy_2D(i0,i1,i2,y,weights):
-	num_correct=0.0
-	predictions=[]
-	for i in range(len(i0)):
-		inputs=[i0[i],i1[i],i2[i]]
-		prediction = predict(inputs,weights)
-		predictions.append(prediction)
-		if y[i]==prediction: num_correct+=1.0
-	print("Predictions:",predictions)
-	return num_correct/float(len(i0))
-
-def train_weights_2D(i0,i1,i2,y,weights,nb_epoch,l_rate,do_plot=False,stop_early=True):
-	for epoch in range(nb_epoch):
-		print("\nEpoch %d"%epoch)
-		print("Weights: ",weights)
-		cur_acc = accuracy_2D(i0,i1,i2,y,weights)
-		print("Accuracy: ",cur_acc)
-		if cur_acc==1.0 and stop_early: break
-		if do_plot: plot_2D(i1,i2,y,weights)
-		for i in range(len(i0)):
-			inputs=[i0[i],i1[i],i2[i]] # first is bias input
-			prediction = predict(inputs,weights) # predict 1.0 or 0.0
-			error = y[i]-prediction  
-			for j in range(len(weights)):
-				weights[j] = weights[j]+(l_rate*error*inputs[j])
-	plot_2D(i1,i2,y,weights)
-	return weights 
-
-def accuracy(input_matrix,ys,weights):
-	num_correct=0.0
-	preds      = []
-	for i in range(len(input_matrix)):
-		inputs = input_matrix[i]
-		pred   = predict(inputs,weights)
+# each matrix row: up to last row = inputs, last row = y (classification)
+def accuracy(matrix,weights):
+	num_correct = 0.0
+	preds       = []
+	for i in range(len(matrix)):
+		pred   = predict(matrix[i][:-1],weights) # get predicted classification
 		preds.append(pred)
-		if pred==ys[i]: num_correct+=1.0
+		if pred==matrix[i][-1]: num_correct+=1.0 
 	print("Predictions:",preds)
-	return num_correct/float(len(input_matrix))
+	return num_correct/float(len(matrix))
 
-def train_weights(input_matrix,y,weights,nb_epoch,l_rate,do_plot=False,stop_early=True):
+# each matrix row: up to last row = inputs, last row = y (classification)
+def train_weights(matrix,weights,nb_epoch=10,l_rate=1.00,do_plot=False,stop_early=True):
 	for epoch in range(nb_epoch):
-		print("\nEpoch %d"%epoch)
-		print("Weights: ",weights)
-		cur_acc = accuracy(input_matrix,y,weights)
+		cur_acc = accuracy(matrix,weights)
+		print("\nEpoch %d \nWeights: "%epoch,weights)
 		print("Accuracy: ",cur_acc)
+		
 		if cur_acc==1.0 and stop_early: break 
-		if do_plot and len(input_matrix[0])==3: plot(input_matrix,y,weights)
-		for i in range(len(input_matrix)):
-			inputs = input_matrix[i]
-			prediction = predict(inputs,weights)
-			error = y[i]-prediction 
-			for j in range(len(weights)):
-				weights[j] = weights[j]+(l_rate*error*inputs[j])
-	if do_plot and len(input_matrix[0])==3: plot(input_matrix,y,weights)
-	return weights 
+		#if do_plot and len(matrix[0])==4: plot(matrix,weights) # if 2D inputs, excluding bias
+		if do_plot: plot(matrix,weights,title="Epoch %d"%epoch)
+		
+		for i in range(len(matrix)):
+			prediction = predict(matrix[i][:-1],weights) # get predicted classificaion
+			error      = matrix[i][-1]-prediction		 # get error from real classification
+			for j in range(len(weights)): 				 # calculate new weight for each node
+				weights[j] = weights[j]+(l_rate*error*matrix[i][j]) 
 
+	#if len(matrix[0])==4: plot(matrix,weights) # if 2D inputs, excluding bias
+	plot(matrix,weights,title="Final Epoch")
+	return weights 
 
 def main():
 
-	part_A=False 
-	if part_A:
+	nb_epoch		= 10
+	l_rate  		= 1.0
+	plot_each_epoch	= False
+	stop_early 		= True
 
-		i0 			= [1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00] # constant bias inputs 
-		i1 			= [0.08,0.10,0.26,0.35,0.45,0.60,0.70,0.92] # x axis of plot
-		i2 			= [0.72,1.00,0.58,0.95,0.15,0.30,0.65,0.45] # y axis of plot
-		y 			= [1.0,0.0,1.0,0.0,1.0,1.0,0.0,0.0] # 1.0 for Class1, 0.0 for Class-1
-		weights 	= [0.20,1.00,-1.00] # initial weights specified in problem
+	part_A = True  
+
+	if part_A: # 3 inputs (including single bias input), 3 weights
+
+				# 	Bias 	i1 		i2 		y
+		matrix = [	[1.00,	0.08,	0.72,	1.0],
+					[1.00,	0.10,	1.00,	0.0],
+					[1.00,	0.26,	0.58,	1.0],
+					[1.00,	0.35,	0.95,	0.0],
+					[1.00,	0.45,	0.15,	1.0],
+					[1.00,	0.60,	0.30,	1.0],
+					[1.00,	0.70,	0.65,	0.0],
+					[1.00,	0.92,	0.45,	0.0]]
+		weights= [	 0.20,	1.00,  -1.00		] # initial weights specified in problem
+
+	else: # 2 inputs (including single bias input), 2 weights
 		
-		nb_epoch		= 50
-		l_rate  		= 1.0
-		plot_each_epoch	= True
-		stop_early 		= True
+		nb_epoch = 1000
 
-		train_weights_2D(i0,i1,i2,y,weights=weights,nb_epoch=nb_epoch,l_rate=l_rate,do_plot=plot_each_epoch,stop_early=stop_early)
+				# 	Bias 	i1 		y
+		matrix = [	[1.00,	0.08,	1.0],
+					[1.00,	0.10,	0.0],
+					[1.00,	0.26,	1.0],
+					[1.00,	0.35,	0.0],
+					[1.00,	0.45,	1.0],
+					[1.00,	0.60,	1.0],
+					[1.00,	0.70,	0.0],
+					[1.00,	0.92,	0.0]]
+		weights= [	 0.20,	1.00		] # initial weights specified in problem
 
-	part_B=True 
-	if part_B:
-
-		i0 			= [1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00] # constant bias inputs 
-		i1 			= [0.08,0.10,0.26,0.35,0.45,0.60,0.70,0.92] # x axis of plot
-		i2 			= [0.72,1.00,0.58,0.95,0.15,0.30,0.65,0.45] # y axis of plot
-		y 			= [1.0,0.0,1.0,0.0,1.0,1.0,0.0,0.0] # 1.0 for Class1, 0.0 for Class-1
-		weights 	= [0.20,1.00,-1.00] # initial weights specified in problem
-		
-		input_matrix=[]
-		for i in range(len(i0)):
-			input_matrix.append([i0[i],i1[i],i2[i]])
-
-		nb_epoch		= 50
-		l_rate  		= 1.0
-		plot_each_epoch	= True
-		stop_early 		= True
-
-		train_weights(input_matrix,y,weights=weights,nb_epoch=nb_epoch,l_rate=l_rate,do_plot=plot_each_epoch,stop_early=stop_early)
+	train_weights(matrix,weights=weights,nb_epoch=nb_epoch,l_rate=l_rate,do_plot=plot_each_epoch,stop_early=stop_early)
 
 
 if __name__ == '__main__':
