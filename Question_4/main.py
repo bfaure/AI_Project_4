@@ -19,6 +19,25 @@ def plot(i1,i2,y,weights=None):
 	ax.set_xlabel("i1")
 	ax.set_ylabel("i2")
 
+	if weights!=None:
+		map_min=0.0
+		map_max=1.1
+
+		y_res=0.001
+		x_res=0.001
+
+		ys=np.arange(map_min,map_max,y_res)
+		xs=np.arange(map_min,map_max,x_res)
+		zs=[]
+		for cur_y in np.arange(map_min,map_max,y_res):
+			cur_zs=[]
+			for cur_x in np.arange(map_min,map_max,x_res):
+				zs.append(predict([1.0,cur_x,cur_y],weights))
+		xs,ys=np.meshgrid(xs,ys)
+		zs=np.array(zs)
+		zs = zs.reshape(xs.shape)
+		cp=plt.contourf(xs,ys,zs,levels=[-1,-0.0001,0,1],colors=('b','r'),alpha=0.1)
+
 	c1_data=[[],[]]
 	c0_data=[[],[]]
 	for i in range(len(i1)):
@@ -40,26 +59,18 @@ def plot(i1,i2,y,weights=None):
 	c0s = plt.scatter(c0_data[0],c0_data[1],s=40.0,c='r',label='Class -1')
 	c1s = plt.scatter(c1_data[0],c1_data[1],s=40.0,c='b',label='Class 1')
 
-	if weights!=None:
-		pred_line=[]
-		pred_x=[]
-		for i in range(len(i1)):
-			if i==0 or i==len(i1)-1:
-				inputs=[1.00,i1[i],i2[i]]
-				pred_line.append(predict(inputs,weights))
-				pred_x.append(i1[i])
-		print("Predictions: ",pred_line)
-		plt.plot(pred_x,pred_line,label='Decision Boundary')
-
 	plt.legend(fontsize=10,loc=1)
 	plt.show()
 
 def accuracy(i0,i1,i2,y,weights):
 	num_correct=0.0
+	predictions=[]
 	for i in range(len(i0)):
 		inputs=[i0[i],i1[i],i2[i]]
 		prediction = predict(inputs,weights)
+		predictions.append(prediction)
 		if y[i]==prediction: num_correct+=1.0
+	print("Predictions:",predictions)
 	return num_correct/float(len(i0))
 
 def train_weights(i0,i1,i2,y,weights,nb_epoch,l_rate,do_plot=False,stop_early=True):
