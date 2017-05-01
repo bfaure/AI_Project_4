@@ -1,5 +1,5 @@
 from __future__ import print_function
-import matplotlib
+import matplotlib,sys
 from matplotlib import pyplot as plt
 import numpy as np
 
@@ -122,7 +122,7 @@ def accuracy(matrix,weights):
 	return num_correct/float(len(matrix))
 
 # each matrix row: up to last row = inputs, last row = y (classification)
-def train_weights(matrix,weights,nb_epoch=10,l_rate=1.00,do_plot=False,stop_early=True):
+def train_weights(matrix,weights,nb_epoch=10,l_rate=1.00,do_plot=False,stop_early=True,verbose=True):
 	for epoch in range(nb_epoch):
 		cur_acc = accuracy(matrix,weights)
 		print("\nEpoch %d \nWeights: "%epoch,weights)
@@ -135,8 +135,11 @@ def train_weights(matrix,weights,nb_epoch=10,l_rate=1.00,do_plot=False,stop_earl
 		for i in range(len(matrix)):
 			prediction = predict(matrix[i][:-1],weights) # get predicted classificaion
 			error      = matrix[i][-1]-prediction		 # get error from real classification
+			if verbose: sys.stdout.write("Training on data at index %d...\n"%(i))
 			for j in range(len(weights)): 				 # calculate new weight for each node
+				if verbose: sys.stdout.write("\tWeight[%d]: %0.5f --> "%(j,weights[j]))
 				weights[j] = weights[j]+(l_rate*error*matrix[i][j]) 
+				if verbose: sys.stdout.write("%0.5f\n"%(weights[j]))
 
 	#if len(matrix[0])==4: plot(matrix,weights) # if 2D inputs, excluding bias
 	plot(matrix,weights,title="Final Epoch")
